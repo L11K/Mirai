@@ -121,7 +121,7 @@ client.on('message', message => {
 				var j = schedule.scheduleJob(airing_time, function(){
 					message.author.send("Hey!\n**" + result.Media.title.romaji + "** is airing right now!\n*INFO:* to send again !remindme <animetitle> for the next episode!")});
 			});	
-		}).catch(error => {message.channel.send("*Sumimasen!*\nI couldn't find what are you looking for..");});;
+		}).catch(error => {message.channel.send("*Sumimasen!*\nI couldn't find what are you looking for..");});
 		break;
 
 		case "help":
@@ -137,7 +137,8 @@ client.on('message', message => {
 
 client.login(api_key);
 
-//That is really bad
+//That is really bad, added just because some event triggers an Uncaught Exception and I wasn't able to debug it
+//If you can please get rid of this atrocity
 process.on('uncaughtException', function(err) {
 	console.log('Caught exception: ' + err);
   });

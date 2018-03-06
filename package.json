@@ -1,0 +1,34 @@
+{
+  "name": "mirai",
+  "version": "0.0.1",
+  "description": "Get latest anime release date, get notified and also get anime infos! ",
+  "main": "bot.js",
+  "scripts": {
+    "test": "node bot.js "
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/deoke/Mirai.git"
+  },
+  "keywords": [
+    "mirai",
+    "discord",
+    "deoke",
+    "bot",
+    "nodejs"
+  ],
+  "author": "Deoke",
+  "license": "GPL-3.0",
+  "bugs": {
+    "url": "https://github.com/deoke/Mirai/issues"
+  },
+  "homepage": "https://github.com/deoke/Mirai#readme",
+  "dependencies": {
+    "discord.js": "^11.3.2",
+    "lokka": "^1.7.0",
+    "lokka-transport-http": "^1.6.1",
+    "mongodb": "^3.0.4",
+    "node-schedule": "^1.3.0",
+    "request": "^2.83.0"
+  }
+}

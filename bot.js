@@ -4,13 +4,14 @@ const Lokka = require('lokka').Lokka;
 const Transport = require('lokka-transport-http').Transport;
 const schedule = require('node-schedule');
 const MongoClient = require('mongodb').MongoClient;
+const config = require("./config.json");
 
 
 const db_url = "mongodb://localhost/MiraiBot";
 const ghql_client = new Lokka({ transport: new Transport("https://graphql.anilist.co/")});
 const client = new Discord.Client();
-const prefix = "!";
-const api_key = "SET YOUR DISCORD API KEY HERE";
+const prefix = config.prefix;
+const api_key = config.token;
 
 
 

@@ -4,6 +4,7 @@ const Lokka = require('lokka').Lokka;
 const Transport = require('lokka-transport-http').Transport;
 const schedule = require('node-schedule');
 const MongoClient = require('mongodb').MongoClient;
+const parseString = require('xml2js').parseString;
 const config = require("./config.json");
 
 
@@ -12,7 +13,6 @@ const ghql_client = new Lokka({ transport: new Transport("https://graphql.anilis
 const client = new Discord.Client();
 const prefix = config.prefix;
 const api_key = config.token;
-
 
 
 function addreminder(reminder_date, user_id, anime, callback){
@@ -33,10 +33,10 @@ function addreminder(reminder_date, user_id, anime, callback){
 		};
 
 		database_obj.collection("remindlist").insertOne(obj, function(err, res){
-			if(err){console.log("[e] Can't add reminder! " + err); return err;}
+			if(err){console.log("[e] Can't add reminder! " + err); return callback(err);}
 		
 			console.log("[i] Added to database!");
-			return reminder_date;
+			return callback(reminder_date);
 		});
 	}); 
 };
@@ -75,7 +75,6 @@ client.on('message', message => {
 				if(error) { message.channel.send("*Sumimasen!*\nI couldn't get your request done.."); return; }
 				const results = JSON.parse(body);
 				if(results.data == undefined || results.data[0] == undefined) { message.channel.send("*Sumimasen!*\nI couldn't find what are you looking for.."); return; }
-
 				const embed = new Discord.RichEmbed()
 					.setTitle("**" + results.data[0].attributes.titles.en_jp + "**" + "  (JPN: " + results.data[0].attributes.titles.ja_jp + ")")
 					.setColor(Math.random() * (16777215))
@@ -143,3 +142,19 @@ client.login(api_key);
 process.on('uncaughtException', function(err) {
 	console.log('Caught exception: ' + err);
   });
+
+
+  //myanimelist.net API search (Experimental)
+  function APISearch(type, title, callback){
+	request(("https://" + config.myanimelist_username + ":" + config.myanimelist_password + "@myanimelist.net/api/" + type + "/search.xml?q=" + title), function(error, response, body){	
+	if(error){ return callback(error); };
+	var xml_body = body;
+		parseString(xml_body, function (err, result) {
+    		callback(result);
+		});
+	});
+  };
+
+//APISearch("manga", "test", function(res, err){
+//	console.log(res);
+//});

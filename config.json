@@ -1,4 +1,7 @@
+
 {
     "token": "TOKEN",
-    "prefix": "++"
+    "prefix": "++",
+    "myanimelist_username": "",
+    "myanimelist_password": ""
 }

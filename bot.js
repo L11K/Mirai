@@ -67,7 +67,7 @@ client.on('message', message => {
 	const args = message.content.slice(prefix.length).trim().split(/ +/g);
 	const command = args.shift().toLowerCase();
 
-	switch (command) {
+	switch (command) { 
 		case "anime":
 			var title = args.slice(0).join(" ").replace(/[^\w\s]/gi, '');
 			console.log("[r] Someone requested: " + title);
@@ -146,15 +146,23 @@ process.on('uncaughtException', function(err) {
 
   //myanimelist.net API search (Experimental)
   function APISearch(type, title, callback){
+	if(config.myanimelist_password == "" || config.myanimelist_username == "")
+		return callback("No username or password provided!", true);
 	request(("https://" + config.myanimelist_username + ":" + config.myanimelist_password + "@myanimelist.net/api/" + type + "/search.xml?q=" + title), function(error, response, body){	
 	if(error){ return callback(error); };
-	var xml_body = body;
-		parseString(xml_body, function (err, result) {
-    		callback(result);
+		parseString(body, function (err, result) {
+			if(err){ return callback(err, true); };
+			//I will get the first result, usually the correct one
+			if(type == "manga")
+				callback(result.manga.entry[0], false);
+			if(type == "anime")
+				callback(result.anime.entry[0], false);
 		});
 	});
   };
 
-//APISearch("manga", "test", function(res, err){
+
+//APISearch("manga", "Attack on Titan", function(res, err){
+//	if(err){console.log("got error" + err);};
 //	console.log(res);
 //});

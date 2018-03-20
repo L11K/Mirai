@@ -17,11 +17,11 @@ const api_key = config.token;
 
 function addreminder(reminder_date, user_id, anime, callback){
 	MongoClient.connect(db_url, function(err, db) {
-		if(err){console.log("[e] Can't connect to Mongodb: " + err); return;}
+		if(err){return callback(err,true);}
 		
 		var database_obj = db.db("MiraiBot");
 		database_obj.createCollection("remindlist", function(err,res){		
-			if(err){console.log("[i] Collection already existing.. " + err)}
+			if(err){return callback(err, true)}
 		});
 
 		var obj = {
@@ -33,10 +33,10 @@ function addreminder(reminder_date, user_id, anime, callback){
 		};
 
 		database_obj.collection("remindlist").insertOne(obj, function(err, res){
-			if(err){console.log("[e] Can't add reminder! " + err); return callback(err);}
+			if(err){return callback(err, true)}
 		
 			console.log("[i] Added to database!");
-			return callback(reminder_date);
+			return callback(reminder_date, false);
 		});
 	}); 
 };
@@ -86,6 +86,7 @@ client.on('message', message => {
 			});
 			break;
 		case "next":
+		//Next must use anilist.co API since they are the only w/ release date for episodes
 		var title = args.slice(0).join(" ").replace(/[^\w\s]/gi, '');
 		var air_req = `query ($query: String) { Media (search: $query, type: ANIME) { title { romaji } nextAiringEpisode { airingAt episode timeUntilAiring } } }`;
 		var vars = {query: title};
@@ -143,7 +144,7 @@ process.on('uncaughtException', function(err) {
 	console.log('Caught exception: ' + err);
   });
 
-
+  //TODO: integrate both providers in a unique function
   //myanimelist.net API search (Experimental)
   function APISearch(type, title, callback){
 	if(config.myanimelist_password == "" || config.myanimelist_username == "")

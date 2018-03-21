@@ -5,6 +5,8 @@ const Transport = require('lokka-transport-http').Transport;
 const schedule = require('node-schedule');
 const MongoClient = require('mongodb').MongoClient;
 const parseString = require('xml2js').parseString;
+const striptags = require('striptags');
+const Entities = require('html-entities').AllHtmlEntities;
 const config = require("./config.json");
 
 
@@ -70,21 +72,61 @@ client.on('message', message => {
 	switch (command) { 
 		case "anime":
 			var title = args.slice(0).join(" ").replace(/[^\w\s]/gi, '');
-			console.log("[r] Someone requested: " + title);
-			request('https://kitsu.io/api/edge/anime?filter[text]=' + title, function (error, response, body) {
-				if(error) { message.channel.send("*Sumimasen!*\nI couldn't get your request done.."); return; }
-				const results = JSON.parse(body);
-				if(results.data == undefined || results.data[0] == undefined) { message.channel.send("*Sumimasen!*\nI couldn't find what are you looking for.."); return; }
+
+			console.log("[r] Someone requested (Anime): " + title);
+
+			APISearch("anime", title, function(res, err){
+
+				if(err){
+					console.log(err);
+					message.channel.send("*Sumimasen!*\nI couldn't get your request done.."); 
+					return;
+				}
+
+
+				if(res == undefined || res.title == undefined){
+					message.channel.send("*Sumimasen!*\nI couldn't find your anime.."); 
+					return;
+				}
+
 				const embed = new Discord.RichEmbed()
-					.setTitle("**" + results.data[0].attributes.titles.en_jp + "**" + "  (JPN: " + results.data[0].attributes.titles.ja_jp + ")")
+					.setTitle("**" + res.english + "**" + "  (JPN: " + res.title + ")")
 					.setColor(Math.random() * (16777215))
-					.setDescription(results.data[0].attributes.synopsis)
-					.setThumbnail(results.data[0].attributes.posterImage.small)
-					.setURL("https://kitsu.io/anime/" + results.data[0].attributes.slug + "\n")
-					.setFooter("Aired: " + results.data[0].attributes.startDate + " | Episodes: " + results.data[0].attributes.episodeCount + " | Status: " + results.data[0].attributes.status + " | Rating: " + results.data[0].attributes.averageRating + "%")
+					.setDescription(Entities.decode(striptags(res.synopsis)))
+					.setThumbnail(res.image)
+					.setURL("https://myanimelist.net/anime/" + res.id + "\n")
+					.setFooter("Aired: " + res.start_date + " | Episodes: " + res.episodes + " | Status: " + res.status + " | Score on MyAnimeList.net: " + res.score)
 					message.channel.send({embed});
 			});
 			break;
+
+		case "manga":
+			var title = args.slice(0).join(" ").replace(/[^\w\s]/gi, '');
+			console.log("[r] Someone requested (Manga): " + title);
+			APISearch("manga", title, function(res, err){
+
+				if(err){
+					message.channel.send("*Sumimasen!*\nI couldn't get your request done.."); 
+					return;
+				}
+
+				if(res == undefined || res.title == undefined){
+					message.channel.send("*Sumimasen!*\nI couldn't find your manga.."); 
+					return;
+				}
+
+			const embed = new Discord.RichEmbed()
+				.setTitle("**" + res.english + "**" + "  (JPN: " + res.title + ")")
+				.setColor(Math.random() * (16777215))
+				.setDescription(Entities.decode(striptags(res.synopsis)))
+				.setThumbnail(res.image)
+				.setURL("https://myanimelist.net/manga/" + res.id + "\n")
+				.setFooter("Start date: " + res.start_date + " | Volumes: " + res.volumes + " | Status: " + res.status + " | Score on MyAnimeList.net: " + res.score)
+				message.channel.send({embed});
+				
+			});
+			break;
+
 		case "next":
 		//Next must use anilist.co API since they are the only w/ release date for episodes
 		var title = args.slice(0).join(" ").replace(/[^\w\s]/gi, '');
@@ -126,7 +168,7 @@ client.on('message', message => {
 		break;
 
 		case "help":
-		message.channel.send("List of available commands: \n!help - This message\n!anime <anime> - Get infos about an anime\n!next <anime> - gets next episode airing time\n!remindme <anime> - Will send you a message when the next episode is airing\n!pat - :3");
+		message.channel.send("List of available commands: \n!help - This message\n!anime <anime> - Get infos about an anime\n!manga <manga> - Get infos about a manga\n!next <anime> - gets next episode airing time\n!remindme <anime> - Will send you a message when the next episode is airing\n!pat - :3");
 		break;
 
 		case "pat":
@@ -151,19 +193,16 @@ process.on('uncaughtException', function(err) {
 		return callback("No username or password provided!", true);
 	request(("https://" + config.myanimelist_username + ":" + config.myanimelist_password + "@myanimelist.net/api/" + type + "/search.xml?q=" + title), function(error, response, body){	
 	if(error){ return callback(error); };
-		parseString(body, function (err, result) {
+		parseString(body, {trim: true, explicitArray: false}, function (err, result) {
 			if(err){ return callback(err, true); };
 			//I will get the first result, usually the correct one
 			if(type == "manga")
 				callback(result.manga.entry[0], false);
-			if(type == "anime")
+			if(type == "anime"){
 				callback(result.anime.entry[0], false);
+			}
 		});
 	});
   };
 
 
-//APISearch("manga", "Attack on Titan", function(res, err){
-//	if(err){console.log("got error" + err);};
-//	console.log(res);
-//});

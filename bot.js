@@ -6,6 +6,7 @@ const schedule = require('node-schedule');
 const MongoClient = require('mongodb').MongoClient;
 const striptags = require('striptags');
 const Entities = require('html-entities').AllHtmlEntities;
+const parseString = require('xml2js').parseString;
 const config = require("./config.json");
 
 

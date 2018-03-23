@@ -4,7 +4,6 @@ const Lokka = require('lokka').Lokka;
 const Transport = require('lokka-transport-http').Transport;
 const schedule = require('node-schedule');
 const MongoClient = require('mongodb').MongoClient;
-const parseString = require('xml2js').parseString;
 const striptags = require('striptags');
 const Entities = require('html-entities').AllHtmlEntities;
 const config = require("./config.json");

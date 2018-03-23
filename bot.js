@@ -4,17 +4,20 @@ const Lokka = require('lokka').Lokka;
 const Transport = require('lokka-transport-http').Transport;
 const schedule = require('node-schedule');
 const MongoClient = require('mongodb').MongoClient;
+<<<<<<< HEAD
 const striptags = require('striptags');
 const Entities = require('html-entities').AllHtmlEntities;
 const parseString = require('xml2js').parseString;
 const config = require("./config.json");
+=======
+>>>>>>> parent of 082aa10... Moved token and prefix to config file
 
 
 const db_url = "mongodb://localhost/MiraiBot";
 const ghql_client = new Lokka({ transport: new Transport("https://graphql.anilist.co/")});
 const client = new Discord.Client();
-const prefix = config.prefix;
-const api_key = config.token;
+const prefix = "!";
+const api_key = "SET YOUR DISCORD API KEY HERE";
 
 
 function addreminder(reminder_date, user_id, anime, callback){
